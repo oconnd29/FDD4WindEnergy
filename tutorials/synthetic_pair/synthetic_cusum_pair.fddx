@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "title": "Synthetic tutorial — noisy sine + CUSUM pair",
+  "created": "2026-09-02T08:46:36+00:00",
+  "modified": "2026-09-02T08:46:36+00:00",
+  "notes": "Synthetic faulty–healthy pair used by the Case data tab. The Monitoring Indicator is a noisy sine wave. CUSUM of |z| (k = 1.05, threshold = 0.99 training quantile) was computed offline and stored in the CSVs. The app only plots those columns and computes CARE. The event interval is a pre-fault window ending at a simulated fault, not a fault window.",
+  "inputs": {
+    "data_types": [
+      "data_other_ts"
+    ],
+    "records": [
+      "rec_expert"
+    ],
+    "cost_inputs": [],
+    "method": "method_ad",
+    "method_notes": "Direct AD: one-sided CUSUM of |z| on the Monitoring Indicator (noisy sine). Fixed HPs: allowance k = 1.05, τ = 0.99 quantile of training CUSUM scores. Not recomputed in the software."
+  },
+  "stage1": {
+    "primary_objective": "obj_early_warning",
+    "secondary_objectives": [],
+    "early_warning": {
+      "reference_event": "Simulated fault at the end of the pre-fault window",
+      "detection_point": "detect_fd_condition",
+      "notes": ""
+    },
+    "maintenance": {
+      "useful_lead_time": "",
+      "acceptable_false_fd": "",
+      "workload_unit": "",
+      "notes": ""
+    },
+    "diagnostic": {
+      "diagnostic_level": "",
+      "notes": ""
+    },
+    "cost_impact": {
+      "cost_terms": [],
+      "sensitivity_planned": false,
+      "notes": ""
+    }
+  },
+  "stage2": {
+    "fault_definition": "Synthetic increase in Monitoring Indicator noise (std doubled) during a pre-fault window. The labelled interval ends at a simulated fault start; it is not the faulted period.",
+    "labelled_level": "Synthetic event (not a physical component fault)",
+    "evidence_tier": "tier_c",
+    "evidence_sources": [
+      "rec_expert"
+    ],
+    "symptom_method": "symptom_rule",
+    "label_representation": "label_interval",
+    "uncertainty": {
+      "evidence_certainty": "cert_categorical",
+      "timing_certainty": "time_point",
+      "source_agreement": "",
+      "label_stability": ""
+    },
+    "healthy_case_evidence": "Matched healthy case: same sampling; smaller sine amplitude and higher noise throughout (stationary). CUSUM of |z| does not reach the persistence threshold.",
+    "circular_risk": false,
+    "notes": ""
+  },
+  "stage3": {
+    "case_construction": "case_constructed",
+    "case_notes": "One synthetic faulty case and one matched healthy case.",
+    "event_windows": {
+      "defined": true,
+      "window_kind": "window_prefault",
+      "boundaries": "Last 96 ten-minute steps of the test period (16 hours). The window ends at the simulated fault; it is a pre-fault window, not a fault window.",
+      "reference_event": "Simulated fault start (end of window)",
+      "timing_rules": "Onset is known by construction (noise std doubles at window start)."
+    },
+    "comparison": "cmp_pairs",
+    "data_periods": {
+      "training": "First 288 samples (2 days).",
+      "validation": "Next 72 samples (12 hours).",
+      "test": "Final 216 samples; pre-fault window in the last 96."
+    },
+    "valid_data_rules": "All synthetic samples are valid.",
+    "tuning_mode": "tune_oracle",
+    "tuning_inventory": "",
+    "tuning_notes": "HPs are fixed for the tutorial, not tuned on this pair.",
+    "fd_condition": "fd_persistence",
+    "fd_condition_notes": "Criticality counter with κ = 12 (short series). C2C uses κ = 72 at 10-minute sampling."
+  },
+  "stage4": {
+    "output_class": "out_binary",
+    "output_score": "out_hard",
+    "include_stability": "no_stability",
+    "accepted_metrics": [
+      "care",
+      "care_c",
+      "care_a",
+      "care_r",
+      "care_e"
+    ],
+    "rejected_metrics": [],
+    "override_notes": ""
+  },
+  "case_data": {
+    "faulty_csv": "tutorials/synthetic_pair/faulty.csv",
+    "healthy_csv": "tutorials/synthetic_pair/healthy.csv",
+    "kappa": 12,
+    "notes": ""
+  },
+  "reproducibility": {
+    "followed": [
+      "data_source",
+      "settings",
+      "gt_provenance",
+      "report"
+    ],
+    "skipped": [],
+    "notes": ""
+  }
+}
